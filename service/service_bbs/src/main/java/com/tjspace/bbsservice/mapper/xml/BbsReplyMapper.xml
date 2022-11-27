@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjspace.bbsservice.mapper.BbsReplyMapper">
+    <resultMap id="replyList" type="com.tjspace.bbsservice.entity.VO.ReplyVO">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="gmtCreate" column="gmt_create"/>
+    </resultMap>
+    <select id="selectReplyPage" resultMap="replyList">
+        select id,user_id,content,gmt_create
+        from bbs_reply
+        where
+        post_id = #{postId}
+        <if test="userId != null and userId!= '' ">
+            and user_id = #{userId}
+        </if>
+        order by gmt_create
+    </select>
+
+</mapper>

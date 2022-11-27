@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjspace.infoservice.mapper.InfoUserMapper">
+    <resultMap id="userPublicInfo" type="com.tjspace.servicebase.entity.DTO.UserPublicInfoDTO">
+        <result property="userId" column="id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="gender" column="gender"/>
+        <result property="grade" column="grade"/>
+        <result property="degree" column="degree"/>
+        <result property="avatar" column="avatar"/>
+        <result property="majorName" column="info_major.name"/>
+
+    </resultMap>
+    <select id="selectUsersPublicInfo" resultMap="userPublicInfo">
+        select id
+        <choose>
+            <when test="attributeSet != null and attributeSet.size >0">
+                <foreach collection="attributeSet" item="attribute" index="i">
+                    <if test="attribute != '' ">
+                        , ${attribute}
+                    </if>
+                </foreach>
+            </when>
+            <otherwise>
+                ,nickname, gender, grade, degree, avatar
+            </otherwise>
+        </choose>
+        from info_user
+        where id in
+        <foreach collection="userIds" item="userId" index="j" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </select>
+</mapper>

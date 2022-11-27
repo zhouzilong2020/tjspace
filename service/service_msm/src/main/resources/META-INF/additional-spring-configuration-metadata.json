@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "aliyun.sms.keyid",
+      "type": "java.lang.String",
+      "description": "Description for aliyun.sms.keyid."
+    },
+    {
+      "name": "aliyun.sms.keysecret",
+      "type": "java.lang.String",
+      "description": "Description for aliyun.sms.keysecret."
+    }
+  ]
+}

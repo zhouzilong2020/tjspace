@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjspace.infoservice.mapper.InfoTeachingMapper">
+    <select id="selectHistoryTeaching" resultType="com.tjspace.infoservice.entity.BO.HistoryTeachingBO">
+        select
+        <choose>
+            <when test="attributeSet != null and attributeSet.size != 0">
+                <foreach collection="attributeSet" index="i" item="attribute" open="" separator="," close="">
+                    ${attribute}
+                </foreach>
+            </when>
+            <otherwise>
+                *
+            </otherwise>
+        </choose>
+        from info_teaching
+        where course_id = #{courseId}
+    </select>
+
+    <select id="selectInfoTeaching" resultType="com.tjspace.infoservice.entity.DO.InfoTeaching">
+        select *
+        from info_teaching
+        <where>
+            <foreach collection="infoTeachingList" item="infoTeaching" close=")" separator="OR" open="(" index="i">
+                teacher_id = #{infoTeaching.teacherId} AND course_id = #{infoTeaching.courseId} AND year =
+                #{infoTeaching.year} AND semester =#{infoTeaching.semester}
+            </foreach>
+        </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>TJSPACE</title>
+    <style>
+        body {
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #main {
+            text-align: center;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+<div id="main">
+    <h3>欢迎注册 TJSPACE·同济大学社群 </h3>
+    您的邮箱验证码是：(<span th:text="${expireTime}"></span>内有效)
+    <h2><span th:text="${code}"></span></h2>
+    <br/>
+</div>
+</body>
+</html>
+

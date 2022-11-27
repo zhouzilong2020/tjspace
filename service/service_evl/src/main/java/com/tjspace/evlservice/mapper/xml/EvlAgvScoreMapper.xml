@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjspace.evlservice.mapper.EvlAgvScoreMapper">
+    <select id="selectAverageScore" resultType="com.tjspace.evlservice.entity.DO.EvlAgvScore">
+        select count(*) as commentCount,
+        AVG(teaching_score) as avgTeachingScore,
+        AVG (content_score) as avgContentScore,
+        AVG (grading_score) as avgGradingScore,
+        AVG (workload_score) as avgWorkloadScore,
+        AVG (tot_score) as avgTotScore
+        from evl_comment
+        where course_id = #{courseId}
+    </select>
+</mapper>

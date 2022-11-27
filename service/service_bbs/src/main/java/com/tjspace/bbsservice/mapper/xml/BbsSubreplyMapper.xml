@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjspace.bbsservice.mapper.BbsSubreplyMapper">
+    <resultMap id="subreplyListValue" type="com.tjspace.bbsservice.entity.BO.SubreplyListBO">
+        <result property="replyId" column="reply_id"/>
+        <collection property="subreplyList" ofType="com.tjspace.bbsservice.entity.DO.BbsSubreply">
+            <result property="id" column="id"/>
+            <result property="content" column="content"/>
+            <result property="userId" column="user_id"/>
+            <result property="gmtCreate" column="gmt_create"/>
+        </collection>
+    </resultMap>
+    <select id="selectSubreplyListMap" resultMap="subreplyListValue">
+        select id,content,user_id,gmt_create,reply_id
+        from bbs_subreply
+        where reply_id in
+        <foreach collection="replyIdSet" item="replyId" index="index" open="(" separator="," close=")">
+            #{replyId}
+        </foreach>
+        order by gmt_create
+    </select>
+</mapper>

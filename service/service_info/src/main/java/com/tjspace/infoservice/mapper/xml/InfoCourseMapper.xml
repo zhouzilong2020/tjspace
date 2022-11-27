@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjspace.infoservice.mapper.InfoCourseMapper">
+    <resultMap id="CourseVO" type="com.tjspace.infoservice.entity.VO.CourseVO">
+        <result property="courseId" column="course_id"/>
+        <result property="title" column="title"/>
+        <result property="credit" column="credit"/>
+        <result property="period" column="period"/>
+        <result property="checkType" column="check_type"/>
+        <result property="officialId" column="official_id"/>
+        <result property="brief" column="brief"/>
+        <result property="remark" column="remark"/>
+        <result property="majorName" column="major_name"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="teacherName" column="teacher_name"/>
+        <result property="teacherTitle" column="teacher_title"/>
+        <result property="teacherDeptName" column="teacher_dept_name"/>
+        <result property="avgTeachingScore" column="avg_teaching_score"/>
+        <result property="avgContentScore" column="avg_content_score"/>
+        <result property="avgGradingScore" column="avg_grading_score"/>
+        <result property="avgWorkloadScore" column="avg_workload_score"/>
+        <result property="avgTotScore" column="avg_tot_score"/>
+        <result property="commentCount" column="comment_count"/>
+    </resultMap>
+    <select id="selectCourseInfo" resultMap="CourseVO">
+        <bind name="isEmpty" value="attributeSet == null or attributeSet.size == 0"/>
+        select
+        <choose>
+            <when test="!isEmpty">
+                <foreach collection="attributeSet" index="i" item="attribute" open="" separator="," close="">
+                    ${attribute}
+                </foreach>
+            </when>
+            <otherwise>
+                course.title as title,
+                credit,
+                period,
+                check_type,
+                official_id,
+                brief,
+                remark,
+                info_major.name as major_name,
+                info_dept.name as dept_name,
+                info_teacher.name as teacher_name,
+                info_teacher.title as teacher_title,
+                info_teacher_dept.name as teacher_dept_name,
+                avg_teaching_score,
+                avg_content_score,
+                avg_grading_score,
+                avg_workload_score,
+                avg_tot_score,
+                comment_count
+            </otherwise>
+        </choose>
+        from
+        (( (SELECT * FROM info_course WHERE info_course.id=#{courseId}) as course
+        <if test='isEmpty or attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@TEACHER_NAME) or attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@TEACHER_TITLE) or attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@TEACHER_DEPT_NAME)'>
+            inner join (info_teacher
+            <if test="isEmpty or attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@TEACHER_DEPT_NAME)">
+                inner join info_dept as info_teacher_dept on dept_id = info_teacher_dept.id
+            </if>
+            ) on course.teacher_id = info_teacher.id
+        </if>
+        )
+        <if test="isEmpty or attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@MAJOR_NAME) or attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@DEPT_NAME)">
+            inner join (info_major
+            <if test="isEmpty or attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@DEPT_NAME)">
+                inner join info_dept on dept_id = info_dept.id
+            </if>
+            ) on major_id = info_major.id
+        </if>
+        )
+        <if test="isEmpty or attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@AVG_TEACHING_SCORE) or
+        attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@AVG_CONTENT_SCORE) or
+        attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@AVG_GRADING_SCORE) or
+        attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@AVG_WORKLOAD_SCORE) or
+        attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@AVG_TOT_SCORE) or
+        attributeSet.contains(@com.tjspace.infoservice.entity.VO.CourseVO@COMMENT_COUNT)">
+            inner join evl_agv_score on course.id = evl_agv_score.course_id
+        </if>
+    </select>
+
+    <select id="searchCourse" resultMap="CourseVO">
+        SELECT info_course.id as course_id,
+        info_course.title as title,
+        info_teacher.name as teacher_name,
+        info_dept.name as dept_name
+        from (info_course inner join info_teacher on info_course.teacher_id = info_teacher.id)
+         inner join (info_major inner join info_dept on info_major.dept_id = info_dept.id) on info_course.major_id = info_major.id
+        <where>
+            <foreach collection="keywords" open="" separator="OR" close="" item="keyword" index="i">
+                info_course.title LIKE '%${keyword}%' or info_teacher.name LIKE '%${keyword}%' or info_dept.name LIKE '%${keyword}%'
+            </foreach>
+        </where>
+        order by(
+        <foreach collection="keywords" open="" separator="+" close="" item="keyword" index="i">
+            (CASE
+            WHEN info_course.title LIKE '%${keyword}%' THEN 1
+            ELSE 0
+            END)
+        </foreach>
+        +
+        <foreach collection="keywords" open="" separator="+" close="" item="keyword" index="i">
+            (CASE
+            WHEN info_teacher.name LIKE '%${keyword}%' THEN 1
+            ELSE 0
+            END)
+        </foreach>
+        +
+        <foreach collection="keywords" open="" separator="+" close="" item="keyword" index="i">
+            (CASE
+            WHEN info_dept.name LIKE '%${keyword}%' THEN 1
+            ELSE 0
+            END)
+        </foreach>
+        ) desc
+    </select>
+
+    <select id="selectCoursesByDeptIds" resultMap="CourseVO">
+        select
+        info_course.id as course_id,
+        info_course.title as title,
+        info_teacher.name as teacher_name,
+        dept.name as dept_name
+        from
+        (((
+        SELECT id,name
+        FROM info_dept
+        <where>
+            id IN
+            <foreach collection="deptIdSet" index="i" item="deptId" open="(" separator="," close=")">
+                #{deptId}
+            </foreach>
+        </where>
+        ) as dept inner join info_major on dept.id=info_major.dept_id)
+        inner join info_course on info_major.id=info_course.major_id)
+        inner join info_teacher on info_teacher.id=info_course.teacher_id
+    </select>
+
+    <select id="selectCoursesByFavorite" resultMap="CourseVO">
+        select
+        info_course.id as course_id,
+        info_course.title as title,
+        info_teacher.name as teacher_name,
+        info_dept.name as dept_name
+        from
+        ((((
+        SELECT course_id
+        FROM fav_course
+        WHERE user_id = #{userId}
+        ) as favorite inner join info_course on favorite.course_id = info_course.id)
+        inner join info_teacher on info_course.teacher_id = info_teacher.id)
+        inner join info_major on info_course.major_id = info_major.id)
+        inner join info_dept on info_major.dept_id = info_dept.id
+    </select>
+</mapper>
